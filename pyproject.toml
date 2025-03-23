@@ -1,0 +1,19 @@
+[project]
+name = "pygraphframes"
+version = "0.1.0"
+description = "GraphFrames in pure PySpark DataFrames API"
+readme = "README.md"
+requires-python = ">=3.11"
+
+
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pyspark[connect]>=3.5",
+  "pytest",
+  "ruff",
+]
+
+[tool.ruff]
+line-length = 100
