@@ -1,7 +1,7 @@
 [project]
-name = "pygraphframes"
+name = "ibisgraph"
 version = "0.1.0"
-description = "GraphFrames in pure PySpark DataFrames API"
+description = "Pregel-based graph algorithms on top of Ibis project"
 readme = "README.md"
 requires-python = ">=3.11"
 
@@ -10,7 +10,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
-  "pyspark[connect]>=3.5",
+  "ibis-framework[duckdb]",
   "pytest",
   "ruff",
 ]
