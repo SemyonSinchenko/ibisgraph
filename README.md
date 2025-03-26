@@ -2,6 +2,10 @@
 
 *Under development!*
 
+<p align="center">
+  <img src="https://github.com/SemyonSinchenko/ibisgraph/blob/initial-development/static/logo.png?raw=true" alt="IbisGraph logo" width="600px"/>
+</p>
+
 ![](./static/logo.png)
 
 IbisGraph is an experimental implementation of [Pregel](https://research.google/pubs/pregel-a-system-for-large-scale-graph-processing/) on top of [Ibis](https://ibis-project.org/) `DataFrames`.
