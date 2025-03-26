@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from ibis import Value
+from ibis import Deferred, Value
 
 
 class PregelConstants(Enum):
@@ -12,8 +12,8 @@ class PregelConstants(Enum):
 @dataclass
 class PregelVertexColumn:
     col_name: str
-    initial_expr: Value
-    update_expr: Value
+    initial_expr: Value | Deferred
+    update_expr: Value | Deferred
 
 @dataclass
 class PregelMessage:

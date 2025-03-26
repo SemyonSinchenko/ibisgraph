@@ -56,7 +56,10 @@ class Pregel:
         return getattr(ibis._, PregelConstants.MSG_COL_NAME.value)
 
     def add_vertex_col(
-        self, col_name: str, initial_expr: ibis.Value, update_expr: ibis.Value
+        self,
+        col_name: str,
+        initial_expr: ibis.Value | ibis.Deferred,
+        update_expr: ibis.Value | ibis.Deferred,
     ) -> Self:
         self._vertex_cols[col_name] = PregelVertexColumn(col_name, initial_expr, update_expr)
         return self
