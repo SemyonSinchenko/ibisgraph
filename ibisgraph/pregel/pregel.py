@@ -1,5 +1,5 @@
 import ibis
-from ibis.expr import types as ir
+from loguru import logger
 from typing_extensions import Callable, Self
 
 from ibisgraph.graph import IbisGraph, IbisGraphConstants
@@ -152,7 +152,7 @@ class Pregel:
         it = 0
 
         while it < self._max_iter:
-            print(f"Start iteration {it} of {self._max_iter}")
+            logger.info(f"Start iteration {it} of {self._max_iter}")
             it += 1
 
             src_nodes_data = pregel_nodes_data.select(
@@ -197,8 +197,9 @@ class Pregel:
 
             if self._do_early_stopping:
                 cnt_of_not_null_msgs = new_messages_table.count().to_pandas()
-                print(f"{cnt_of_not_null_msgs} non null messages were generated.")
+                logger.info(f"{cnt_of_not_null_msgs} non null messages were generated.")
                 if cnt_of_not_null_msgs == 0:
+                    logger.info(f"Pregel stopped on the iteration {it}: no more messages.")
                     break
 
             assert self._agg_expression_func is not None
@@ -249,9 +250,10 @@ class Pregel:
                 )
                 if len(all_active) == 1:
                     if not all_active.values[0]:
-                        print("All nodes are non-active. Aborting.")
+                        logger.info("Pregel stopped earlier: all nodes are non-active.")
                         break
 
+        logger.info("Pregel stopped: max-iterations reached.")
         if self._has_active_flag:
             return pregel_nodes_data.drop(PregelConstants.ACTIVE_VERTEX_FLAG.value)
         else:

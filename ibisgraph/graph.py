@@ -1,6 +1,7 @@
 from enum import Enum
 
 import ibis
+from pandas.core.algorithms import is_integer
 from typing_extensions import Self
 
 
@@ -23,6 +24,34 @@ class IbisGraph:
         dst_col: str = "dst",
         weight_col: str | None = None,
     ) -> None:
+        if id_col not in nodes.schema().keys():
+            raise ValueError(
+                f"ID column {id_col} is not present. Did you mean one of {nodes.schema().names}"
+            )
+
+        if not nodes.schema()[id_col].is_integer():
+            raise ValueError(
+                f"ID data type is {nodes.schema()[id_col]} but only integer-like types are supported for nodes!"
+            )
+        if src_col not in edges.schema().keys():
+            raise ValueError(
+                f"ID column {src_col} is not present. Did you mean one of {edges.schema().names}"
+            )
+        if dst_col not in edges.schema().keys():
+            raise ValueError(
+                f"ID column {dst_col} is not present. Did you mean one of {edges.schema().names}"
+            )
+
+        if not edges.schema()[src_col].is_integer():
+            raise ValueError(
+                f"SRC data type is {edges.schema()[src_col]} but only integer-like types are supported for nodes!"
+            )
+
+        if not edges.schema()[dst_col].is_integer():
+            raise ValueError(
+                f"DST data type is {edges.schema()[dst_col]} but only integer-like types are supported for nodes!"
+            )
+
         self._nodes = nodes.rename({IbisGraphConstants.ID.value: id_col})
         self._edges = edges.rename(
             {IbisGraphConstants.SRC.value: src_col, IbisGraphConstants.DST.value: dst_col}
@@ -57,4 +86,3 @@ class IbisGraph:
     @property
     def directed(self) -> bool:
         return self._directed
-

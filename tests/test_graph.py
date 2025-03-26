@@ -2,7 +2,7 @@ import pytest
 
 
 def test_num_nodes(karate_club):
-    assert karate_club.num_nodes == 33
+    assert karate_club.num_nodes == 34
 
 
 def test_num_edges(karate_club):

@@ -108,7 +108,7 @@ def karate_club():
         [34, 33],
     ]
 
-    nodes = ibis.memtable({"id": list(range(1, 34))})
+    nodes = ibis.memtable({"id": list(range(1, 35))})
     edges = ibis.memtable(
         {"src": [ee[0] for ee in original_edges], "dst": [ee[1] for ee in original_edges]}
     )

@@ -10,9 +10,9 @@ def page_rank(
     alpha: float = 0.85,
     max_iters: int = 20,
     checkpoint_interval: int = 1,
-    tol: float = 1e-2,
+    tol: float = 1e-4,
 ) -> ibis.Table:
-    if (alpha <= 0) or (abs(alpha) >= 1.0):
+    if (alpha <= 0) or (alpha >= 1.0):
         raise ValueError(f"Expected 0 <= alpha < 1.0 but got {alpha}.")
     num_nodes = graph.num_nodes
     coeff = (1 - alpha) / num_nodes
@@ -33,26 +33,20 @@ def page_rank(
     )
     pregel = Pregel(new_g)
 
+    rank_upd_expr = ibis.ifelse(
+        pregel.pregel_msg().isnull(), ibis.literal(0.0), pregel.pregel_msg()
+    ) * ibis.literal(alpha) + ibis.literal(coeff)
+
     pregel = (
         pregel.add_vertex_col(
             "pagerank",
             ibis.literal(initial_scores),
-            ibis.ifelse(pregel.pregel_msg().notnull(), pregel.pregel_msg(), ibis.literal(0.0))
-            * ibis.literal(alpha)
-            + ibis.literal(coeff),
+            rank_upd_expr,
         )
         .add_vertex_col(
             "err",
             ibis.literal(100.0),
-            ibis.ifelse(
-                pregel.pregel_msg().notnull(),
-                (
-                    ibis._["pagerank"]
-                    - pregel.pregel_msg() * ibis.literal(alpha)
-                    + ibis.literal(coeff)
-                ),
-                ibis.literal(0.0)
-            ),
+            (ibis._["pagerank"] - rank_upd_expr).abs(),
         )
         .add_message_to_dst(pregel.pregel_src("pagerank") / pregel.pregel_src("degree"))
         .set_agg_expression_func(lambda msg: msg.collect().sums())
