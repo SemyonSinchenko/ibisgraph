@@ -32,7 +32,7 @@ class Pregel:
     def __init__(self, graph: IbisGraph) -> None:
         self._graph = graph
         self._has_active_flag = False
-        self._initial_active_flag = ibis.literal(True)
+        self._initial_active_flag: ibis.Value | ibis.Deferred = ibis.literal(True)
         self._vertex_cols: dict[str, PregelVertexColumn] = {}
         self._messages: list[PregelMessage] = []
         self._agg_expression_func: Callable[[ibis.Value], ibis.Value] | None = None
@@ -42,7 +42,7 @@ class Pregel:
         self._active_flag_upd_expr: ibis.Value | ibis.Deferred | None = None
         self._filter_messages_from_non_active: bool = False
         self._stop_if_all_non_active: bool = False
-        
+
     def pregel_src(self, col_name: str) -> ibis.Value:
         return getattr(ibis._, IbisGraphConstants.SRC.value)[col_name]
 
@@ -79,7 +79,7 @@ class Pregel:
         self._has_active_flag = value
         return self
 
-    def set_initial_active_flag(self, expression: ibis.Value) -> Self:
+    def set_initial_active_flag(self, expression: ibis.Value | ibis.Deferred) -> Self:
         self._has_active_flag = True
         self._initial_active_flag = expression
         return self
@@ -185,7 +185,7 @@ class Pregel:
                 dst_active = triplets[IbisGraphConstants.DST.value][
                     PregelConstants.ACTIVE_VERTEX_FLAG.value
                 ].cast("bool")
-                triplets = triplets.filter(ibis.and_(src_active, dst_active))
+                triplets = triplets.filter(ibis.or_(src_active, dst_active))
 
             triplets_with_messages = triplets.select(ibis.array(messages).unnest().name("msg"))
             new_messages_table = triplets_with_messages.filter(

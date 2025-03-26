@@ -1,7 +1,6 @@
 from enum import Enum
 
 import ibis
-from pandas.core.algorithms import is_integer
 from typing_extensions import Self
 
 
@@ -14,6 +13,24 @@ class IbisGraphConstants(Enum):
 
 
 class IbisGraph:
+    """
+    A graph representation using Ibis tables for nodes and edges.
+
+    This class provides a flexible graph data structure that can handle:
+    - Directed and undirected graphs
+    - Optional weighted edges
+    - Integer-based node and edge identifiers
+
+    Attributes:
+        nodes (ibis.Table): Table containing node information
+        edges (ibis.Table): Table containing edge connections
+        directed (bool): Whether the graph is directed or undirected
+        num_nodes (int): Total number of nodes in the graph
+        num_edges (int): Total number of edges in the graph
+
+    Example:
+        graph = IbisGraph(nodes_table, edges_table, directed=True)
+    """
     def __init__(
         self,
         nodes: ibis.Table,

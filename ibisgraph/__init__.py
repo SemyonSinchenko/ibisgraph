@@ -1,1 +1,3 @@
-from .graph import IbisGraph, IbisGraphConstants  # noqa: F401
+from .graph import IbisGraph, IbisGraphConstants
+
+__all__ = ["IbisGraph", "IbisGraphConstants"]
