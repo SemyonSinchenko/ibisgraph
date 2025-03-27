@@ -14,23 +14,23 @@ IbisGraph is an experimental implementation of [Pregel](https://research.google/
 
 Is it a replacement of graph-libraries, like NetworkX or IGraph?
 
-*No, this is not a replacement for graph libraries. While IbisGraph is based on Pregel, which was designed for large-scale graph processing and can be easily explained in terms of SQL, it will always be significantly slower compared to other implementations of graph algorithms.*
+- *No, this is not a replacement for graph libraries. While IbisGraph is based on Pregel, which was designed for large-scale graph processing and can be easily explained in terms of SQL, it will always be significantly slower compared to other implementations of graph algorithms.*
 
 Will it work on Databricks, Snowflake, PostgrSQL, etc.?
 
-*Yes. IbisGraph should work with any backend, [supported](https://ibis-project.org/backends/support/matrix) in Ibis.*
+- *Yes. IbisGraph should work with any backend, [supported](https://ibis-project.org/backends/support/matrix) in Ibis.*
 
 Why Pregel?
 
-*I do not know an alternative graph-processing framework, that can be so easily explained in terms of SQL-operations.*
+- *I do not know an alternative graph-processing framework, that can be so easily explained in terms of SQL-operations.*
 
 Is it better than GraphFrames for PySpark users?
 
-*As a committer of the GraphFrames project, I can say that GraphFrames algorithms are generally better optimized for Apache Spark's specific features. However, I believe that IbisGraph's API is more Pythonic compared to GraphFrames' PySpark API. Additionally, IbisGraph doesn't require extra steps, such as building JARs and configuring the cluster, to run it.*
+- *As a committer of the GraphFrames project, I can say that GraphFrames algorithms are generally better optimized for Apache Spark's specific features. However, I believe that IbisGraph's API is more Pythonic compared to GraphFrames' PySpark API. Additionally, IbisGraph doesn't require extra steps, such as building JARs and configuring the cluster, to run it.*
 
 When should I use IbisGraph?
 
-*I designed IbisGraph for cases where users need to process connected data stored in a Database, Lakehouse, or cloud Data Warehouse (DWH) system. IbisGraph provides graph abstractions and implementations of graph algorithms that run on the database, cloud DWH, or query engine side. While the implementations of graph algorithms in IbisGraph are generally slower compared to specialized tools like Neo4j, IbisGraph's main advantage is that it doesn't require moving data outside of the target system.*
+- *I designed IbisGraph for cases where users need to process connected data stored in a Database, Lakehouse, or cloud Data Warehouse (DWH) system. IbisGraph provides graph abstractions and implementations of graph algorithms that run on the database, cloud DWH, or query engine side. While the implementations of graph algorithms in IbisGraph are generally slower compared to specialized tools like Neo4j, IbisGraph's main advantage is that it doesn't require moving data outside of the target system.*
 
 ## Features
 
