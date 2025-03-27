@@ -1,7 +1,20 @@
+import pathlib
+from dataclasses import dataclass
+
 import ibis
 import pytest
 
 from ibisgraph import IbisGraph
+
+PROJECT_ROOT = pathlib.Path(__file__).parent.parent
+
+
+@dataclass
+class LDBCDataset:
+    name: str
+    graph: IbisGraph
+    bfs_results: ibis.Table
+    properties: dict[str, str]
 
 
 @pytest.hookimpl()
@@ -114,3 +127,30 @@ def karate_club():
     )
 
     yield IbisGraph(nodes, edges)
+
+
+@pytest.fixture
+def ldbc_kgs():
+    ldbc_kgs_root = PROJECT_ROOT.joinpath("resources").joinpath("ldbc").joinpath("kgs")
+    nodes = ibis.read_csv(ldbc_kgs_root.joinpath("kgs.v"), delim=" ", header=False, names=["id"])
+    edges = ibis.read_csv(
+        ldbc_kgs_root.joinpath("kgs.e"), delim=" ", header=False, names=["src", "dst", "weight"]
+    )
+    graph = IbisGraph(nodes, edges, directed=False)
+
+    bfs_results = ibis.read_csv(
+        ldbc_kgs_root.joinpath("kgs-BFS"), delim=" ", header=False, names=["node_id", "distance"]
+    )
+    properties = {}
+    with ldbc_kgs_root.joinpath("kgs.properties").open("r") as file:
+        for line in file:
+            if "=" in line:
+                key, value = line.split("=", 1)
+                properties[key.strip()] = value.strip()
+
+    yield LDBCDataset(
+        name="kgs",
+        graph=graph,
+        bfs_results=bfs_results,
+        properties=properties,
+    )

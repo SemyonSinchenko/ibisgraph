@@ -150,7 +150,7 @@ class Pregel:
             ibis.struct({col: getattr(ibis._, col) for col in self._graph._edges.columns}).name(
                 IbisGraphConstants.EDGE.value
             )
-        )
+        ).cache()
 
         it = 0
 
