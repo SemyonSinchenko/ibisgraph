@@ -10,6 +10,14 @@
 
 IbisGraph is an experimental implementation of [Pregel](https://research.google/pubs/pregel-a-system-for-large-scale-graph-processing/) on top of [Ibis](https://ibis-project.org/) DataFrames.
 
+## Getting started
+
+```sh
+pip install ibisgraph
+```
+
+*NOTE: you need to install an ibis-extra for your backend manually! Plese, check the Ibis-project documentation about how to do it: https://ibis-project.org/install*
+
 ## FAQ
 
 Is it a replacement of graph-libraries, like NetworkX or IGraph?
