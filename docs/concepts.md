@@ -8,7 +8,7 @@ The algorithm is designed to be iterative but includes an option to stop early w
 
 Pregel operates through synchronized iterations called supersteps. Each superstep consists of three main steps: (1) each vertex prepares messages to send to its neighbors based on its internal state, (2) each vertex collects and aggregates messages received from its neighbors, and (3) each vertex updates its internal state based on the aggregated messages. While the operations within a single vertex are independent and atomic, Pregel enforces a blocking phase at the end of each superstep: all vertices must complete their computations before the next superstep begins.
 
-![A very simple illustration of the Pregel idea.](../static/pregel.png)
+![A very simple illustration of the Pregel idea.](https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/pregel.png)
 
 ## Example: shortest paths to node
 
@@ -28,7 +28,7 @@ If the aggregation results are smaller than the current message state, we will u
 
 ### Example for 6-nodes graph
 
-![Simple example of Shortest Paths with Pregel](../static/pregel-sp.png)
+![Simple example of Shortest Paths with Pregel](https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/pregel-sp.png)
 
 As you can see, on the iteration 4 we are sending a message to the vertex that has a state equal to 2, so in that case we are not updating the state.
 

@@ -2,7 +2,7 @@
 
 An iplementation of Pregel-framework for Graph Processing on top of Ibis-project DataFrames. Batteries are included!
 
-![](../static/logo.png)
+![](https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/logo.png)
 
 ## Table on contents
 
