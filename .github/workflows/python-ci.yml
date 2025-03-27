@@ -21,4 +21,4 @@ jobs:
     - name: Code style
       run: uv run ruff check ibisgraph
     - name: Tests
-      run: uv pytest -vvv
+      run: uv run pytest -vvv
