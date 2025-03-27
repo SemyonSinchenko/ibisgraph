@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
 [project]
 name = "ibisgraph"
 version = "0.1.0"
@@ -6,7 +10,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 
 
-dependencies = []
+dependencies = [
+    "loguru>=0.7",
+    "ibis-framework"
+]
 
 [dependency-groups]
 dev = [
@@ -14,6 +21,29 @@ dev = [
   "pytest",
   "ruff",
 ]
+docs = [
+    "mkdocs",
+    "mkdocs-material-extensions",
+    "mkdocs-material",
+    "mkdocs-literate-nav",
+    "mkdocs-gen-files",
+    "mkdocstrings-python",
+    "mkdocs-section-index",
+    "mkdocs-macros-plugin",
+]
 
 [tool.ruff]
 line-length = 100
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+version_scheme = "no-guess-dev"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "ibisgraph",
+    "README.md",
+    "LICENSE",
+]

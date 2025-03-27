@@ -1,0 +1,67 @@
+site_name: IbisGraph
+site_url: "https://semyonsinchenko.github.io/ibisgraph/"
+repo_url: "https://github.com/SemyonSinchenko/ibisgraph"
+repo_name: "SemyonSinchenko/ibisgraph"
+
+theme:
+  name: material
+  palette:
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    toggle:
+      icon: material/brightness-7
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    toggle:
+      icon: material/brightness-4
+      name: Switch to light mode
+  features:
+    - navigation.tracking
+    - navigation.instant
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.footer
+    - navigation.indexes
+    - navigation.expand
+    - content.tabs.link
+    - content.code.copy
+    - content.code.select
+
+plugins:
+  - search
+  - section-index
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            docstring_options:
+              show_if_no_docstring: true
+            show_source: true
+
+nav:
+  - Home: index.md
+  - Concepts: concepts.md
+  - Python API:
+    - 'API Reference': "python/reference/SUMMARY.md"
+
+markdown_extensions:
+    - markdown_include.include:
+        base_path: docs
+    - attr_list
+    - pymdownx.emoji:
+        emoji_index: !!python/name:material.extensions.emoji.twemoji
+        emoji_generator: !!python/name:material.extensions.emoji.to_svg
+    - pymdownx.highlight:
+        anchor_linenums: true
+        line_spans: __span
+        pygments_lang_class: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.superfences
+
