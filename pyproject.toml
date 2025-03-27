@@ -21,6 +21,16 @@ dev = [
   "pytest",
   "ruff",
 ]
+docs = [
+    "mkdocs",
+    "mkdocs-material-extensions",
+    "mkdocs-material",
+    "mkdocs-literate-nav",
+    "mkdocs-gen-files",
+    "mkdocstrings-python",
+    "mkdocs-section-index",
+    "mkdocs-macros-plugin",
+]
 
 [tool.ruff]
 line-length = 100
