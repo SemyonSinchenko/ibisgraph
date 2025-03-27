@@ -46,6 +46,7 @@ plugins:
 
 nav:
   - Home: index.md
+  - Concepts: concepts.md
   - Python API:
     - 'API Reference': "python/reference/SUMMARY.md"
 
