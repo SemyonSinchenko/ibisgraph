@@ -30,6 +30,7 @@ docs = [
     "mkdocstrings-python",
     "mkdocs-section-index",
     "mkdocs-macros-plugin",
+    "markdown-include",
 ]
 
 [tool.ruff]

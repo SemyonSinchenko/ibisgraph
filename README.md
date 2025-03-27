@@ -5,7 +5,7 @@
 [![Tests and Code Style](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-ci.yml/badge.svg)](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-ci.yml)
 
 <p align="center">
-  <img src="https://github.com/SemyonSinchenko/ibisgraph/blob/initial-development/static/logo.png?raw=true" alt="IbisGraph logo" width="600px"/>
+  <img src="https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/logo.png" alt="IbisGraph logo" width="600px"/>
 </p>
 
 IbisGraph is an experimental implementation of [Pregel](https://research.google/pubs/pregel-a-system-for-large-scale-graph-processing/) on top of [Ibis](https://ibis-project.org/) DataFrames.
