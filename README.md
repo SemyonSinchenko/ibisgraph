@@ -1,4 +1,4 @@
-# IbisGraph
+<h1 style="text-align: center"><b>IbisGraph</b></h1>
 
 *Under development!*
 
