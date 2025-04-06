@@ -13,25 +13,31 @@ def label_propagation(
     checkpoint_interval: int = 1,
     sort_labels: bool = False,
 ) -> ibis.Table:
-    """
-    Perform Label Propagation clustering on a graph with Pregel.
+    """Perform Label Propagation clustering on a graph with Pregel.
 
     Label Propagation is an iterative algorithm that assigns labels to nodes
     based on the labels of their neighbors. Each node initially starts with
     its own unique label and then iteratively adopts the most frequent label
-    among its neighbors. This implementation is not determenistic if sort_labels is False.
-    If sort_labels is True, then labels are sorted by index and result is determenistic,
-    but it may tend to cases when all the labels in the output will be the same,
-    because nodes with low id will be preferred.
+    among its neighbors.
 
-    :param graph: Input graph to perform clustering on.
-    :param max_iter: Maximum number of iterations. Defaults to 30.
-    :param checkpoint_interval: Interval for checkpointing. Defaults to 1.
-    :param sort_labels: If True, sort labels before selecting mode. Defaults to False.
+    Args:
+        graph: Input graph to perform clustering on.
+        max_iter: Maximum number of iterations. Defaults to 30.
+        checkpoint_interval: Interval for checkpointing. Defaults to 1.
+            Recommended to keep at 1 for single-node/in-memory backends.
+            For distributed engines like Apache Spark, larger values are recommended.
+        sort_labels: If True, sort labels before selecting mode. Defaults to False.
 
-    :returns: A table with two columns:
-            - 'node_id': Original node identifiers
-            - 'label': Assigned cluster label for each node
+    Returns:
+        A table with two columns:
+        - 'node_id': Original node identifiers
+        - 'label': Assigned cluster label for each node
+
+    Note:
+        This implementation is not deterministic if sort_labels is False.
+        If sort_labels is True, then labels are sorted by index and result is deterministic,
+        but it may tend to cases when all labels in the output will be the same,
+        because nodes with low IDs will be preferred.
     """
     pregel = (
         Pregel(graph)
@@ -50,7 +56,7 @@ def label_propagation(
 
     pregel = pregel.add_message_to_dst(pregel.pregel_src(LABEL_COL_NAME))
 
-    if not graph.directed:
+    if not graph.is_directed:
         pregel = pregel.add_message_to_src(pregel.pregel_dst(LABEL_COL_NAME))
 
     if sort_labels:

@@ -2,65 +2,171 @@
 
 *Under development!*
 
-[![Tests and Code Style](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-ci.yml/badge.svg)](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-ci.yml)
+[![Tests and Code Style](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-ci.yml/badge.svg)](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-ci.yml)[![deploy-docs](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/docs.yml/badge.svg)](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/docs.yml)[![Upload Python Package](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-publish.yml/badge.svg)](https://github.com/SemyonSinchenko/ibisgraph/actions/workflows/python-publish.yml)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/logo.png" alt="IbisGraph logo" width="600px"/>
 </p>
 
-IbisGraph is an experimental implementation of [Pregel](https://research.google/pubs/pregel-a-system-for-large-scale-graph-processing/) on top of [Ibis](https://ibis-project.org/) DataFrames.
+## Idea
 
-## Getting started
+IbisGraph brings graph processing capabilities to your data warehouse or lake house by implementing the Pregel computation model on top of [Ibis](https://ibis-project.org/). This means you can perform graph analytics directly where your data lives, without moving it to specialized graph databases or in-memory systems.
 
-```sh
+Key benefits:
+- Process graph data in your existing data infrastructure
+- Scale with your warehouse/lake resources
+- Maintain data governance and security
+- Leverage SQL engine optimizations
+
+Supported backends include:
+- DuckDB
+- PostgreSQL
+- SQLite
+- Snowflake
+- BigQuery
+- Apache Spark
+- And [many others](https://ibis-project.org/backends/) supported by Ibis
+
+## Quick Start
+
+Install IbisGraph using pip:
+
+```bash
 pip install ibisgraph
 ```
 
-*NOTE: you need to install an ibis-extra for your backend manually! Plese, check the Ibis-project documentation about how to do it: https://ibis-project.org/install*
+You'll also need to install the appropriate Ibis backend. For example:
+
+```bash
+# For DuckDB
+pip install "ibis-framework[duckdb]"
+
+# For PostgreSQL
+pip install "ibis-framework[postgres]"
+
+# For Snowflake
+pip install "ibis-framework[snowflake]"
+```
+
+Basic usage:
+
+```python
+import ibis
+import ibisgraph as ig
+
+# Connect to your database
+conn = ibis.duckdb.connect()
+
+# Create a graph
+graph = ig.Graph(nodes_table, edges_table)
+
+# Run algorithms
+pagerank = ig.centrality.pagerank(graph)
+communities = ig.clustering.label_propagation(graph)
+similarities = ig.similarity.node_similarity(graph)
+```
+
+For more detailed examples, check our [documentation](https://semyonsinchenko.github.io/ibisgraph/).
 
 ## FAQ
 
-Is it a replacement of graph-libraries, like NetworkX or IGraph?
+Is it a replacement for graph libraries like NetworkX or IGraph?
 
-- *No, this is not a replacement for graph libraries. While IbisGraph is based on Pregel, which was designed for large-scale graph processing and can be easily explained in terms of SQL, it will always be significantly slower compared to other implementations of graph algorithms.*
+- *No, IbisGraph is not a replacement for traditional graph libraries. While it implements graph algorithms using Pregel (which can be expressed in SQL), it will generally be slower than specialized implementations. Its value comes from being able to process graph data where it already lives.*
 
-Will it work on Databricks, Snowflake, PostgrSQL, etc.?
+Will it work on Databricks, Snowflake, PostgreSQL, etc.?
 
-- *Yes. IbisGraph should work with any backend, [supported](https://ibis-project.org/backends/support/matrix) in Ibis.*
+- *Yes. IbisGraph works with any backend [supported by Ibis](https://ibis-project.org/backends/support/matrix).*
 
 Why Pregel?
 
-- *I do not know an alternative graph-processing framework, that can be so easily explained in terms of SQL-operations.*
+- *Pregel operations can be naturally expressed using SQL operations, making it ideal for implementing graph algorithms in data warehouses and lakes.*
 
 Is it better than GraphFrames for PySpark users?
 
-- *As a committer of the GraphFrames project, I can say that GraphFrames algorithms are generally better optimized for Apache Spark's specific features. However, I believe that IbisGraph's API is more Pythonic compared to GraphFrames' PySpark API. Additionally, IbisGraph doesn't require extra steps, such as building JARs and configuring the cluster, to run it.*
+- *As a GraphFrames committer, I can say that GraphFrames algorithms are generally better optimized for Apache Spark. However, IbisGraph provides a more Pythonic API and doesn't require JVM configuration.*
 
 When should I use IbisGraph?
 
-- *I designed IbisGraph for cases where users need to process connected data stored in a Database, Lakehouse, or cloud Data Warehouse (DWH) system. IbisGraph provides graph abstractions and implementations of graph algorithms that run on the database, cloud DWH, or query engine side. While the implementations of graph algorithms in IbisGraph are generally slower compared to specialized tools like Neo4j, IbisGraph's main advantage is that it doesn't require moving data outside of the target system.*
+- *Use IbisGraph when you need to process connected data stored in a database, datalake, or warehouse system without moving it out. While algorithms may run slower compared to specialized tools like Neo4j, the main advantage is processing data in place.*
 
-## Features
+## Features and Roadmap
 
-- Quite fast on single-node with `DuckDB` backend.
-- Write once, debug locally, run on a Database or cluster.
-- Theoretically support all the supported by Ibis backends (Snwoflake, PostgreSQL, PySpark, etc.).
-- Not only Pregel: batteries are included.
-
-## Implemented algorithms
-
-- [x] Graph abstraction, represented by two `ibis.Table` (nodes and edges)
-- [x] In-degrees, out-degrees, degrees
+Implemented:
+- [x] Graph abstraction using Ibis Tables
+- [x] Degree calculations (in/out/total)
 - [x] Jaccard similarity index
-- [x] Pregel as a low-level building block for Graph processing
-- [x] PageRank
+- [x] Pregel computation framework
+- [x] PageRank algorithm
 - [x] Shortest Paths
 - [x] Label Propagation
+
+Coming soon:
 - [ ] Weakly Connected Components
 - [ ] Strongly Connected Components
 - [ ] Attribute Propagation
-- [ ] Gremlin
-- [ ] OpenCypher
+- [ ] Random Walks
+- [ ] Node2vec
+- [ ] Gremlin support
+- [ ] OpenCypher support
+- [ ] *The feature you will suggest*
+
+## Contributing
+
+We welcome contributions! Here's how to get started:
+
+### Development Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/SemyonSinchenko/ibisgraph.git
+cd ibisgraph
+```
+
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+```
+
+3. Install development dependencies:
+```bash
+uv sync --all-groups
+```
+
+### Development Standards
+
+We use:
+- [ruff](https://github.com/astral-sh/ruff) for linting and formatting
+- [pytest](https://docs.pytest.org/) for testing
+- [uv](https://github.com/astral-sh/uv) for dependency management
+- [DuckDB](https://duckdb.org/) for testing
+
+### Development Process
+
+1. **Pick an Issue**
+    - Check existing issues or create a new one
+    - Comment on the issue you want to work on
+
+2. **Fork & Branch**
+    - Fork the repository
+    - Create a feature branch
+
+3. **Development**
+    - Write tests first
+    - Implement your changes
+    - Run tests: `pytest`
+    - Run linter: `ruff check .`
+    - Format code: `ruff format .`
+
+4. **Submit PR**
+    - Create a Pull Request
+    - Wait for review
+    - Address feedback
+
+### Project Philosophy
+
+IbisGraph follows the [Benevolent Dictator governance model](https://en.wikipedia.org/wiki/Benevolent_dictator_for_life). While we welcome all contributions, final decisions rest with the project maintainer to ensure consistent direction.
 
 ## Inspirations
 

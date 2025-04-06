@@ -39,15 +39,15 @@ plugins:
       handlers:
         python:
           options:
-            docstring_style: sphinx
+            docstring_style: google
             show_if_no_docstring: true
             show_source: true
 
 nav:
   - Home: index.md
   - Concepts: concepts.md
-  - Python API:
-    - 'API Reference': "python/reference/SUMMARY.md"
+  - Usecases: usecases.md
+  - Python API: "python/reference/SUMMARY.md"
 
 markdown_extensions:
     - markdown_include.include:

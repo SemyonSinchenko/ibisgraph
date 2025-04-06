@@ -16,26 +16,30 @@ def shortest_paths(
     checkpoint_interval: int = 1,
     max_iter: int = 20,
 ) -> ibis.Table:
-    """
-    Calculate shortest paths from multiple landmark nodes in a graph using Pregel.
+    """Calculate shortest paths from multiple landmark nodes in a graph using Pregel.
 
-    This function computes the shortest distances from specified landmark nodes to all other
-    nodes in the graph using a Pregel-based algorithm. It supports both directed and
+    Computes the shortest distances from specified landmark nodes to all other
+    nodes in the graph using a Pregel-based algorithm. Supports both directed and
     undirected graphs.
 
-    It is recommended to leave the "checkpoint_interval" equal to 1 for any single-node / in-memory backend.
-    For distributed engines like Apache Spark, it is recommended to use bigger valuef for "checkpoint_interval".
+    Args:
+        graph: The input graph to compute shortest paths on.
+        landmarks: Sequence of node IDs to use as landmark/source nodes.
+        checkpoint_interval: Interval for checkpointing. Defaults to 1.
+            Recommended to keep at 1 for single-node/in-memory backends.
+            For distributed engines like Apache Spark, larger values are recommended.
+        max_iter: Maximum number of Pregel iterations. Acts as a safeguard against
+            infinite iterations. Defaults to 20.
 
-    Warning! Distances to landmarks are handled as columns internally, so if the landmarks contains a lot of elements,
-    there can be performance issues because of operations on a very wide tables.
+    Returns:
+        A table with two columns:
+        - "node_id": The ID of each node in the graph
+        - "distances": A struct containing shortest distances to each landmark node
+            (distance_to_{landmark_id} -> distance (int))
 
-    :param graph: The input graph to compute shortest paths on.
-    :param landmarks: A sequence of node IDs to use as landmark/source nodes.
-    :param checkpoint_interval: Interval for checkpointing. Defaults to 1.
-    :param max_iter: A maximal amount of Pregel iterations. Use it as a save-guard to avoid infinite Pregel iterations.
-    :returns: A table with two columns:
-        - "node_id", the ID of each node in the graph;
-        - "distances", a struct containing shortest distances to each landmark node (distance_to_{} -> distance (int))
+    Warning:
+        Distances to landmarks are handled as columns internally. If landmarks contains
+        many elements, there may be performance issues due to operations on very wide tables.
     """
     pregel = (
         Pregel(graph)
@@ -91,7 +95,7 @@ def shortest_paths(
         )
     )
 
-    if not graph.directed:
+    if not graph.is_directed:
         pregel_to_src_check_exprs = [
             ibis.or_(
                 pregel.pregel_dst(distance_col_pattern.format(lmark)) + ibis.literal(1)
