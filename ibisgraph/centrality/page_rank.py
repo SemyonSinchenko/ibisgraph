@@ -16,29 +16,35 @@ def page_rank(
     checkpoint_interval: int = 1,
     tol: float = 1e-4,
 ) -> ibis.Table:
-    """
-    Compute PageRank for a graph using the Pregel iterative algorithm.
+    """Compute PageRank for a graph using the Pregel iterative algorithm.
 
     PageRank measures the importance of nodes in a graph based on the structure of incoming links.
     The algorithm simulates a random walk through the graph, where a hypothetical 'random surfer'
     follows links with probability `alpha` and jumps to a random node with probability `1 - alpha`.
 
-    If you want to run it "until convergence", set up max_iter to a high value and control the flow by "tol".
-    If you want to run it for just a few iterations, set up tol to 0 and control the flow by "max_iter".
+    Args:
+        graph: The input graph for PageRank computation.
+        alpha: Damping factor controlling random walk probability. Must be between 0 and 1.
+            Defaults to 0.85.
+        max_iters: Maximum number of iterations. Defaults to 20.
+        checkpoint_interval: Interval for checkpointing. Defaults to 1.
+            Recommended to keep at 1 for single-node/in-memory backends.
+            For distributed engines like Apache Spark, larger values are recommended.
+        tol: Convergence tolerance. Stops when score changes are below this value.
+            Defaults to 1e-4.
 
-    It is recommended to leave the "checkpoint_interval" equal to 1 for any single-node / in-memory backend.
-    For distributed engines like Apache Spark, it is recommended to use bigger valuef for "checkpoint_interval".
+    Returns:
+        A table with node IDs (column "node_id") and their corresponding PageRank scores
+        (column "pagerank").
 
-    While this implementation supports undirected graphs, PageRank is not clearly defined for this kind of graphs.
+    Raises:
+        ValueError: If alpha is not between 0 and 1.
 
-    :param graph: The input graph for PageRank computation.
-    :param alpha: Damping factor controlling random walk probability. Defaults to 0.85. Must be between 0 and 1.
-    :param max_iters: Maximum number of iterations. Defaults to 20.
-    :param checkpoint_interval: Interval for checkpointing. Defaults to 1.
-    :param tol: Convergence tolerance. Stops when score changes are below this value. Defaults to 1e-4.
-
-    :returns: A table with node IDs (column "node_id") and their corresponding PageRank scores (column "pagerank").
-    :raises ValueError: If alpha is not between 0 and 1.
+    Note:
+        - For convergence-based stopping: Set max_iter high and control flow with tol.
+        - For fixed iterations: Set tol to 0 and control flow with max_iter.
+        - While this implementation supports undirected graphs, PageRank is not
+          clearly defined for such graphs.
     """
     if (alpha <= 0) or (alpha >= 1.0):
         raise ValueError(f"Expected 0 <= alpha < 1.0 but got {alpha}.")

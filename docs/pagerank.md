@@ -203,45 +203,45 @@ market_makers = (
 ## Benefits of Using IbisGraph for PageRank Analysis
 
 1. **Scalability**
-   - Processes large transaction networks efficiently
-   - Handles millions of transactions and entities
-   - Leverages data warehouse computational resources
+    - Processes large transaction networks efficiently
+    - Handles millions of transactions and entities
+    - Leverages data warehouse computational resources
 
 2. **Data Security**
-   - Keeps sensitive financial data within your secure environment
-   - Maintains regulatory compliance
-   - Provides audit trail for analyses
+    - Keeps sensitive financial data within your secure environment
+    - Maintains regulatory compliance
+    - Provides audit trail for analyses
 
 3. **Real-time Analysis**
-   - Can be updated as new transactions occur
-   - Supports continuous monitoring
-   - Enables quick response to changes in network dynamics
+    - Can be updated as new transactions occur
+    - Supports continuous monitoring
+    - Enables quick response to changes in network dynamics
 
 4. **Integration Capabilities**
-   - Works with existing data warehouse infrastructure
-   - Combines easily with other analysis tools
-   - Supports multiple data sources
+    - Works with existing data warehouse infrastructure
+    - Combines easily with other analysis tools
+    - Supports multiple data sources
 
 ## Practical Use Cases
 
 1. **Regulatory Compliance**
-   - Identify systematically important financial institutions
-   - Monitor market concentration
-   - Track changes in financial network structure
+    - Identify systematically important financial institutions
+    - Monitor market concentration
+    - Track changes in financial network structure
 
 2. **Risk Management**
-   - Assess counterparty exposure
-   - Monitor network dependencies
-   - Identify potential cascading failures
+    - Assess counterparty exposure
+    - Monitor network dependencies
+    - Identify potential cascading failures
 
 3. **Business Intelligence**
-   - Find key market participants
-   - Analyze customer importance
-   - Track market influence
+    - Find key market participants
+    - Analyze customer importance
+    - Track market influence
 
 4. **Fraud Detection**
-   - Identify unusual influence patterns
-   - Detect hidden relationships
-   - Monitor network anomalies
+    - Identify unusual influence patterns
+    - Detect hidden relationships
+    - Monitor network anomalies
 
 This approach provides a powerful tool for understanding complex financial networks while maintaining data security and leveraging existing infrastructure. It can be integrated into various analysis workflows and supports both strategic and operational decision-making.

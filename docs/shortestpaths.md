@@ -172,40 +172,40 @@ weighted_paths = weighted_graph.shortest_paths(blacklisted_ids)
 ## Benefits of Using IbisGraph with Snowflake
 
 1. **Data Security**
-   - Sensitive transaction data never leaves Snowflake
-   - Complies with data governance policies
-   - Maintains audit trail within Snowflake
+    - Sensitive transaction data never leaves Snowflake
+    - Complies with data governance policies
+    - Maintains audit trail within Snowflake
 
 2. **Performance**
-   - Leverages Snowflake's computational resources
-   - Scales automatically with data volume
-   - Efficient processing of large transaction networks
+    - Leverages Snowflake's computational resources
+    - Scales automatically with data volume
+    - Efficient processing of large transaction networks
 
 3. **Real-time Analysis**
-   - Can be integrated into customer onboarding flows
-   - Supports continuous monitoring
-   - Easy to update as new transactions occur
+    - Can be integrated into customer onboarding flows
+    - Supports continuous monitoring
+    - Easy to update as new transactions occur
 
 4. **Compliance**
-   - Maintains data lineage
-   - Supports regulatory reporting requirements
-   - Provides audit trails for risk decisions
+    - Maintains data lineage
+    - Supports regulatory reporting requirements
+    - Provides audit trails for risk decisions
 
 ## Practical Applications
 
 1. **Customer Onboarding**
-   - Pre-screen new customers
-   - Set initial risk levels
-   - Determine required due diligence level
+    - Pre-screen new customers
+    - Set initial risk levels
+    - Determine required due diligence level
 
 2. **Ongoing Monitoring**
-   - Track changes in risk proximity
-   - Identify emerging risk patterns
-   - Support suspicious activity reporting
+    - Track changes in risk proximity
+    - Identify emerging risk patterns
+    - Support suspicious activity reporting
 
 3. **Portfolio Risk Management**
-   - Assess aggregate exposure to high-risk entities
-   - Monitor risk concentration
-   - Support strategic decisions
+    - Assess aggregate exposure to high-risk entities
+    - Monitor risk concentration
+    - Support strategic decisions
 
 This approach provides a data-driven, scalable solution for risk assessment while maintaining data security and leveraging existing infrastructure. It can be easily integrated into existing compliance workflows and supports both batch and real-time analysis needs.

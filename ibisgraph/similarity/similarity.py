@@ -4,20 +4,24 @@ from ibisgraph.graph import IbisGraph, IbisGraphConstants
 
 
 def jaccard_similarity(graph: IbisGraph) -> ibis.Table:
-    """
-    Calculate Jaccard similarity between all pairs of nodes in a graph.
+    """Calculate Jaccard similarity between all pairs of nodes in a graph.
 
     Jaccard similarity is defined as the size of the intersection of two nodes' neighborhoods
     divided by the size of their union. This function computes pairwise Jaccard similarities
     for all nodes in the graph.
 
-    For undirected graphs, the edge list is symmetrized to ensure correct neighborhood calculation.
+    Args:
+        graph: The input graph to compute Jaccard similarities on.
 
-    :param graph: The input graph to compute Jaccard similarities on.
-    :returns: A table with three columns:
+    Returns:
+        A table with three columns:
         - "node_id_left": The first node in the pair
         - "node_id_right": The second node in the pair
         - "jaccard_similarity": The Jaccard similarity between the two nodes' neighborhoods
+
+    Note:
+        For undirected graphs, the edge list is symmetrized to ensure correct
+        neighborhood calculation.
     """
     edges = graph.edges
     if not graph.is_directed:

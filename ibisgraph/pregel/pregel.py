@@ -8,9 +8,7 @@ from .models import PregelConstants, PregelMessage, PregelVertexColumn
 
 
 class Pregel:
-    """
-    A Pregel-style graph processing implementation using Ibis for both single-node
-    and distributed graph computations.
+    """A Pregel-style graph processing implementation using Ibis.
 
     This class provides a flexible framework for implementing vertex-centric graph algorithms
     with support for:
@@ -25,20 +23,16 @@ class Pregel:
     Key methods allow adding vertex columns, defining message passing strategies,
     and controlling algorithm execution parameters.
 
-    This API is considered as the low-level. While it is public, it may be hard to use it directly.
-    It is recommended to use a high-level APIs with routines, already implemented with this Pregel.
+    Note:
+        This API is considered low-level. While it is public, it may be hard to use directly.
+        It is recommended to use high-level APIs with routines already implemented with this Pregel.
     """
 
     def __init__(self, graph: IbisGraph) -> None:
-        """
-        Initialize a Pregel graph processing instance.
+        """Initialize a Pregel graph processing instance.
 
-        This method sets up the initial state for a Pregel-style graph computation,
-        preparing the graph for vertex-centric processing. It initializes various
-        internal attributes with default values that can be customized later.
-
-        :param graph: An IbisGraph instance representing the graph to be processed
-        :type graph: IbisGraph
+        Args:
+            graph: An IbisGraph instance representing the graph to be processed.
         """
         self._graph = graph
         self._has_active_flag = False
@@ -54,38 +48,43 @@ class Pregel:
         self._stop_if_all_non_active: bool = False
 
     def pregel_src(self, col_name: str) -> ibis.Value:
-        """
-        Helper method that simplify an access to attributes of the source column
-        in messages generation.
+        """Helper method to access attributes of the source column in messages generation.
 
-        :param col_name: a name of the attribute
-        :returns: ibis warpper around the attribute
+        Args:
+            col_name: Name of the attribute.
+
+        Returns:
+            Ibis wrapper around the attribute.
         """
         return getattr(ibis._, IbisGraphConstants.SRC.value)[col_name]
 
     def pregel_dst(self, col_name: str) -> ibis.Value:
-        """
-        Helper method that simplify an access to attributes of the dst column
-        in messages generation.
+        """Helper method to access attributes of the destination column in messages generation.
 
-        :param col_name: a name of the attribute
-        :returns: ibis warpper around the attribute
+        Args:
+            col_name: Name of the attribute.
+
+        Returns:
+            Ibis wrapper around the attribute.
         """
         return getattr(ibis._, IbisGraphConstants.DST.value)[col_name]
 
     def pregel_edge(self, col_name: str) -> ibis.Value:
-        """
-        Helper method that simplify an access to attributes of the edge
-        in messages generation.
+        """Helper method to access attributes of the edge in messages generation.
 
-        :param col_name: a name of the attribute
-        :returns: ibis warpper around the attribute
+        Args:
+            col_name: Name of the attribute.
+
+        Returns:
+            Ibis wrapper around the attribute.
         """
         return getattr(ibis._, IbisGraphConstants.EDGE.value)[col_name]
 
     def pregel_msg(self) -> ibis.Value:
-        """
-        Helper method that simplify an access to the Pregel message.
+        """Helper method to access the Pregel message.
+
+        Returns:
+            Ibis wrapper around the message.
         """
         return getattr(ibis._, PregelConstants.MSG_COL_NAME.value)
 
@@ -95,23 +94,28 @@ class Pregel:
         initial_expr: ibis.Value | ibis.Deferred,
         update_expr: ibis.Value | ibis.Deferred,
     ) -> Self:
-        """
-        Add a vertex column to the Pregel. Column should has name, initial value and an update expression.
+        """Add a vertex column to the Pregel.
 
-        :param col_name: a name of the column. It will be a part of the output
-        :param initial_expr: expression for the initial value of the column
-        :update_expr: expression to update the column, may use pregel_msg
-        :returns: an updated instance of the Pregel
+        Args:
+            col_name: Name of the column that will be part of the output.
+            initial_expr: Expression for the initial value of the column.
+            update_expr: Expression to update the column, may use pregel_msg.
+
+        Returns:
+            Updated instance of the Pregel.
         """
         self._vertex_cols[col_name] = PregelVertexColumn(col_name, initial_expr, update_expr)
         return self
 
     def remove_vertex_col(self, col_name) -> Self:
-        """
-        Delete already added new vertex column by name. Does nothing if column does not exists.
+        """Delete an already added vertex column by name.
 
-        :param col_name: a name of the column to delete
-        :returns: an updated instance of the Pregel
+        Args:
+            col_name: Name of the column to delete.
+
+        Returns:
+            Updated instance of the Pregel.
+            Does nothing if column does not exist.
         """
         if col_name in self._vertex_cols:
             self._vertex_cols.pop(col_name)
@@ -119,95 +123,100 @@ class Pregel:
         return self
 
     def add_message_to_src(self, message: ibis.Value) -> Self:
-        """
-        Add a message to the list of Pregel messages with a target equal to source of the edge.
+        """Add a message targeting the source of the edge.
 
-        :param message: ibis expression for the message; can use srs, dst and edge attributes.
-        :returns: an updated instance of the Pregel
+        Args:
+            message: Ibis expression for the message; can use src, dst and edge attributes.
+
+        Returns:
+            Updated instance of the Pregel.
         """
         self._messages.append(PregelMessage(self.pregel_src(IbisGraphConstants.ID.value), message))
         return self
 
     def add_message_to_dst(self, message: ibis.Value) -> Self:
-        """
-        Add a message to the list of Pregel messages with a target equal to destination of the edge.
+        """Add a message targeting the destination of the edge.
 
-        :param message: ibis expression for the message; can use srs, dst and edge attributes.
-        :returns: an updated instance of the Pregel
+        Args:
+            message: Ibis expression for the message; can use src, dst and edge attributes.
+
+        Returns:
+            Updated instance of the Pregel.
         """
         self._messages.append(PregelMessage(self.pregel_dst(IbisGraphConstants.ID.value), message))
         return self
 
     def set_has_active_flag(self, value: bool) -> Self:
-        """
-        Set flag that algorithm supports vertices voting to stop iterations earlier
-        or stop generating messages from this column (to both src and dst). If initial
-        expression would not be provided, "literal(True)" will be used that means all the
-        vertices considered initially active.
+        """Set whether algorithm supports vertices voting to stop iterations.
 
-        :param value: flag value
-        :returns: an updated instance of the Pregel
+        Args:
+            value: Whether to enable active flag support.
+
+        Returns:
+            Updated instance of the Pregel.
+
+        Note:
+            If initial expression is not provided, "literal(True)" will be used,
+            meaning all vertices are initially active.
         """
         self._has_active_flag = value
         return self
 
     def set_initial_active_flag(self, expression: ibis.Value | ibis.Deferred) -> Self:
-        """
-        Set the expression that will be used for initial values of the active flag column.
-        Automatically set "has_active_flag" to True.
+        """Set the expression for initial values of the active flag column.
 
-        :param expression: ibis expression for the initial value of the active flag
-        :returns: an updated instance of the Pregel
+        Args:
+            expression: Ibis expression for the initial value of the active flag.
+
+        Returns:
+            Updated instance of the Pregel.
+            Automatically sets "has_active_flag" to True.
         """
         self._has_active_flag = True
         self._initial_active_flag = expression
         return self
 
     def set_agg_expression_func(self, expression: Callable[[ibis.Value], ibis.Value]) -> Self:
-        """
-        Set the aggregation expression function for processing messages.
+        """Set the aggregation expression function for processing messages.
 
-        This method allows defining a custom aggregation function to combine messages
-        received by a vertex during a single iteration of the Pregel algorithm. It can access
-        pregel msg internally.
+        Args:
+            expression: A callable that takes an Ibis value (message column) and returns
+                an aggregated Ibis value. Common aggregations include sum, max, first, etc.
 
-        :param expression: A callable that takes an Ibis value (message column) and returns
-                           an aggregated Ibis value. Common aggregations include sum, max, first, etc.
-        :returns: An updated instance of the Pregel
+        Returns:
+            Updated instance of the Pregel.
         """
         self._agg_expression_func = expression
         return self
 
     def set_early_stopping(self, value: bool) -> Self:
-        """
-        Set whether early stopping is enabled for the Pregel algorithm.
+        """Set whether early stopping is enabled.
 
-        Early stopping allows the Pregel algorithm to terminate before reaching the maximum
-        number of iterations if no new messages are generated. This can help optimize
-        computation by stopping when the algorithm has converged or no further changes
-        are expected. But the check that there is a non-null message is not free, so if you
-        know that there are always non null messages (for example, LabelPropagation),
-        it is strongly recommended to rely on different ways to control the Pregel-flow
-        (vertices voting, max iter, etc.)
+        Early stopping allows termination before reaching maximum iterations if no new
+        messages are generated. This can optimize computation but has overhead for checking
+        message nullity. For algorithms with guaranteed non-null messages (e.g., LabelPropagation),
+        it's recommended to use other control methods (vertices voting, max iter, etc.).
 
-        :param value: A boolean flag to enable or disable early stopping
-        :returns: An updated instance of the Pregel
+        Args:
+            value: Whether to enable early stopping.
+
+        Returns:
+            Updated instance of the Pregel.
         """
         self._do_early_stopping = value
         return self
 
     def set_max_iter(self, value: int) -> Self:
-        """
-        Set the maximum number of iterations for the Pregel algorithm.
+        """Set the maximum number of iterations.
 
-        This method allows controlling the total number of iterations the Pregel algorithm
-        will execute. If the algorithm converges earlier, it may stop before reaching the
-        maximum number of iterations. However, this method ensures that the algorithm will
-        not run indefinitely.
+        Args:
+            value: Positive integer for maximum iterations.
 
-        :param value: A positive integer representing the maximum number of iterations
-        :raises ValueError: If a non-positive integer is provided
-        :returns: An updated instance of the Pregel
+        Returns:
+            Updated instance of the Pregel.
+
+        Raises:
+            ValueError: If value is not positive.
         """
         if value <= 0:
             raise ValueError(f"Expected positive integer but got {value}.")
@@ -216,20 +225,19 @@ class Pregel:
         return self
 
     def set_checkpoint_interval(self, value: int) -> Self:
-        """
-        Set the interval for checkpointing during Pregel iterations.
+        """Set the interval for checkpointing during iterations.
 
-        Checkpointing allows intermediate results to be cached periodically during the
-        Pregel algorithm's execution. This can help with performance and memory management
-        by creating intermediate snapshots of the graph's state. But checkpoints are not free!
+        For DuckDB and other single-node backends, checkpoint on each step works better.
+        For distributed engines like Apache Spark, larger values are recommended.
 
-        For DuckDB and other single-node backends checkpoint on each step works better.
-        For the case of distributed engine, like Apache Spark, the bigger value is recommended.
+        Args:
+            value: Number of iterations between checkpoints. 0 disables checkpointing.
 
-        :param value: The number of iterations between each checkpoint.
-                      Set to 0 to disable checkpointing.
-        :raises ValueError: If a negative integer is provided
-        :returns: An updated instance of the Pregel
+        Returns:
+            Updated instance of the Pregel.
+
+        Raises:
+            ValueError: If value is negative.
         """
         if value < 0:
             raise ValueError(f"Expected non-negative integer but got {value}.")
@@ -238,64 +246,73 @@ class Pregel:
         return self
 
     def set_active_flag_upd_col(self, expression: ibis.Value | ibis.Deferred) -> Self:
-        """
-        Set a custom update expression for the active flag column.
+        """Set a custom update expression for the active flag column.
 
-        This method allows defining a custom expression to determine whether a vertex
-        remains active in the Pregel algorithm. The expression can use message information
-        or other vertex attributes to decide vertex activity. For example, in the PageRank
-        this expression should check is the difference between old and new ranks grater than tolerance.
+        Args:
+            expression: Ibis expression defining how the active flag should be updated.
+                For example, in PageRank this expression should check if the difference
+                between old and new ranks is greater than tolerance.
 
-        :param expression: An Ibis expression defining how the active flag should be updated
-        :returns: An updated instance of the Pregel
+        Returns:
+            Updated instance of the Pregel.
         """
         self._active_flag_upd_expr = expression
         return self
 
     def set_filter_messages_from_non_active(self, value: bool) -> Self:
-        """
-        Set whether messages from non-active vertices should be filtered out.
+        """Set whether to filter out messages from non-active vertices.
 
-        When set to True, the Pregel algorithm will only process messages from edges where
-        at least one of the source or destination vertices is active. This can help optimize
-        computation by reducing unnecessary message processing for inactive vertices. In some
-        cases, Pregel will be broken by that setting! For example, in LabelPropagation,
-        if the vertex did not change it's label it is considered unactive, but we should continue
-        generate messages from it!
+        Args:
+            value: Whether to enable message filtering.
 
-        :param value: Boolean flag to enable/disable filtering of messages from non-active vertices
-        :returns: an updated instance of the Pregel
+        Returns:
+            Updated instance of the Pregel.
+
+        Note:
+            This can break some algorithms! For example, in LabelPropagation,
+            if a vertex didn't change its label it's considered inactive,
+            but we should continue generating messages from it.
         """
         self._filter_messages_from_non_active = value
         return self
 
     def set_stop_if_all_unactive(self, value: bool) -> Self:
-        """
-        Set whether the Pregel algorithm should stop early if all vertices become inactive.
+        """Set whether to stop early if all vertices become inactive.
 
-        When set to True, the algorithm will terminate if all vertices are marked as non-active
-        during an iteration. This can help optimize computation by stopping early when no further
-        processing is needed. Not all the algorithms can benefit from this feature! Check is not free.
+        Args:
+            value: Whether to enable stopping on all inactive.
 
-        :param value: Boolean flag to enable/disable early stopping when all vertices are inactive
-        :returns: an updated instance of the Pregel
+        Returns:
+            Updated instance of the Pregel.
+
+        Note:
+            Not all algorithms benefit from this feature! The check has overhead.
         """
         self._stop_if_all_non_active = value
         return self
 
     def _validate(self) -> None:
+        """Validate Pregel configuration before running.
+
+        Raises:
+            ValueError: If required components are missing.
+        """
         if self._agg_expression_func is None:
             raise ValueError("AggExpression should be provided!")
         if len(self._messages) == 0:
             raise ValueError("At least one message (to src or to dst) should be provided!")
         if len(self._vertex_cols) == 0:
-            raise ValueError("At least one vertex column should be prvided!")
+            raise ValueError("At least one vertex column should be provided!")
 
     def run(self) -> ibis.Table:
-        """
-        Run the Pregel and return the result in the form of the Table.
+        """Run the Pregel algorithm and return results.
 
-        :returns: a table with all the exisitng vertices columns and all the new columns.
+        Returns:
+            Table with all existing vertices columns and all new columns.
+            If active flag was used, it is removed from the final result.
+
+        Raises:
+            ValueError: If validation fails before running.
         """
         self._validate()
         messages = [
