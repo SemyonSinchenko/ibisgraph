@@ -45,7 +45,7 @@ def page_rank(
     num_nodes = graph.num_nodes
     coeff = (1 - alpha) / num_nodes
     initial_scores = 1.0 / num_nodes
-    if graph.directed:
+    if graph.is_directed:
         tmp_degrees = out_degrees(graph).rename(
             {IbisGraphConstants.ID.value: "node_id", "degree": "out_degree"}
         )
@@ -87,7 +87,7 @@ def page_rank(
         .set_stop_if_all_unactive(True)
     )
 
-    if not graph.directed:
+    if not graph.is_directed:
         pregel = pregel.add_message_to_src(
             pregel.pregel_dst(PAGERANK_SCORE_COL_NAME) / pregel.pregel_dst("degree")
         )

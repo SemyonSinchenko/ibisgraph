@@ -20,7 +20,7 @@ def jaccard_similarity(graph: IbisGraph) -> ibis.Table:
         - "jaccard_similarity": The Jaccard similarity between the two nodes' neighborhoods
     """
     edges = graph.edges
-    if not graph.directed:
+    if not graph.is_directed:
         edges = edges.union(
             edges.select(
                 edges[IbisGraphConstants.DST.value].name(IbisGraphConstants.SRC.value),

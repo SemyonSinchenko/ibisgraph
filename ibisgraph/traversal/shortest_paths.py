@@ -91,7 +91,7 @@ def shortest_paths(
         )
     )
 
-    if not graph.directed:
+    if not graph.is_directed:
         pregel_to_src_check_exprs = [
             ibis.or_(
                 pregel.pregel_dst(distance_col_pattern.format(lmark)) + ibis.literal(1)

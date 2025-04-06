@@ -50,7 +50,7 @@ def label_propagation(
 
     pregel = pregel.add_message_to_dst(pregel.pregel_src(LABEL_COL_NAME))
 
-    if not graph.directed:
+    if not graph.is_directed:
         pregel = pregel.add_message_to_src(pregel.pregel_dst(LABEL_COL_NAME))
 
     if sort_labels:

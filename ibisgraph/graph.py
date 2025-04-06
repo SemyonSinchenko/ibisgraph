@@ -5,6 +5,13 @@ from typing_extensions import Self
 
 
 class IbisGraphConstants(Enum):
+    """
+    Constants for standardizing column names and identifiers in graph data structures.
+
+    These constants provide a consistent naming convention for graph-related columns
+    to ensure compatibility and ease of use across different graph processing operations.
+    """
+
     ID = "id_"
     SRC = "src_"
     DST = "dst_"
@@ -31,6 +38,7 @@ class IbisGraph:
     Example:
         graph = IbisGraph(nodes_table, edges_table, directed=True)
     """
+
     def __init__(
         self,
         nodes: ibis.Table,
@@ -41,6 +49,21 @@ class IbisGraph:
         dst_col: str = "dst",
         weight_col: str | None = None,
     ) -> None:
+        """
+        Initialize an IbisGraph with nodes and edges.
+
+        Args:
+            nodes (ibis.Table): Table containing node information
+            edges (ibis.Table): Table containing edge connections
+            directed (bool, optional): Whether the graph is directed. Defaults to False.
+            id_col (str, optional): Column name for node IDs. Defaults to "id".
+            src_col (str, optional): Column name for source node in edges. Defaults to "src".
+            dst_col (str, optional): Column name for destination node in edges. Defaults to "dst".
+            weight_col (str | None, optional): Column name for edge weights. Defaults to None.
+
+        Raises:
+            ValueError: If input columns are missing or have incorrect data types.
+        """
         if id_col not in nodes.schema().keys():
             raise ValueError(
                 f"ID column {id_col} is not present. Did you mean one of {nodes.schema().names}"
@@ -81,25 +104,51 @@ class IbisGraph:
         self._directed = directed
 
     def set_directed(self, value: bool) -> Self:
+        """
+        Set the directionality of the graph.
+
+        :param value: Whether the graph should be directed or undirected.
+        :returns: The current graph instance for method chaining.
+        """
         self._directed = value
         return self
 
     @property
     def nodes(self) -> ibis.Table:
+        """
+        Get the nodes table of the graph.
+
+        :returns: A table containing node information with node identifiers.
+        """
         return self._nodes
 
     @property
     def edges(self) -> ibis.Table:
+        """
+        Get the nodes table of the graph.
+
+        :returns: A table containing edges information with edges identifiers.
+        """
         return self._edges
 
     @property
     def num_nodes(self) -> int:
+        """
+        Get a number of nodes.
+
+        :returns: A number of nodes in the graph  
+        """
         return int(self._nodes.count().to_pandas())
 
     @property
     def num_edges(self) -> int:
+        """
+        Get a number of edges.
+
+        :returns: A number of edges in the graph  
+        """
         return int(self._edges.count().to_pandas())
 
     @property
-    def directed(self) -> bool:
+    def is_directed(self) -> bool:
         return self._directed
