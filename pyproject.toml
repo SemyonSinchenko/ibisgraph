@@ -5,10 +5,54 @@ build-backend = "hatchling.build"
 [project]
 name = "ibisgraph"
 version = "0.1.0"
-description = "Pregel-based graph algorithms on top of Ibis project"
+description = "The portable graph processing and algorithms library"
 readme = "README.md"
 requires-python = ">=3.11"
-
+license-files = ["LICENSE"]
+authors = [
+  { name = "Sem Sinchenko", email = "ssinchenko@apache.org" },
+]
+maintainers = [
+  { name = "Sem Sinchenko", email = "ssinchenko@apache.org" },
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Analysts",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python",
+  "Programming Language :: SQL",
+  "Topic :: Database :: Front-Ends",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Software Development :: Code Generators",
+  "Topic :: Software Development :: User Interfaces",
+  "License :: OSI Approved :: Apache Software License",
+]
+keywords = [
+  "sql",
+  "database",
+  "graph",
+  "network-analysis",
+  "pagerank",
+  "mysql",
+  "bigquery",
+  "clickhouse",
+  "sqlite",
+  "impala",
+  "postgresql",
+  "snowflake",
+  "pandas",
+  "pyspark",
+  "mssql",
+  "trino",
+  "pyarrow",
+  "datafusion",
+  "duckdb",
+  "polars",
+]
 
 dependencies = [
     "loguru>=0.7",
