@@ -1,105 +1,240 @@
-# Pregel
+# Pregel Implementation in IbisGraph
 
-## Top-level overview
+## Overview
 
-[Pregel](https://research.google/pubs/pregel-a-system-for-large-scale-graph-processing/) is a core concept and a main building block in the IbisGraph library. Let's explore how it works under the hood.
+This document explains how IbisGraph implements Pregel-like graph processing using SQL operations. The implementation translates Pregel's vertex-centric computation model into a series of SQL operations that can run in any data warehouse or data lake supported by Ibis.
 
-The algorithm is designed to be iterative but includes an option to stop early when convergence is achieved. The main advantage of Pregel is that it can operate without any global state. This means that, theoretically, any Pregel-based algorithm is infinitely scalable, and this scalability is horizontal. We can distribute nodes across the cluster, and all we need to do is transmit very small messages from one node to another. Each message contains a minimal piece of information, while aggregations and message processing are atomic operations for each node.
+## What is Pregel?
 
-Pregel operates through synchronized iterations called supersteps. Each superstep consists of three main steps: (1) each vertex prepares messages to send to its neighbors based on its internal state, (2) each vertex collects and aggregates messages received from its neighbors, and (3) each vertex updates its internal state based on the aggregated messages. While the operations within a single vertex are independent and atomic, Pregel enforces a blocking phase at the end of each superstep: all vertices must complete their computations before the next superstep begins.
+Pregel is a system for large-scale graph processing introduced by Google. It uses a vertex-centric approach where:
 
-![A very simple illustration of the Pregel idea.](https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/pregel.png)
+1. Each vertex can store state
+2. Vertices communicate through messages
+3. Computation proceeds in synchronized iterations (supersteps)
 
-## Example: shortest paths to node
+In each superstep:
 
-Let's examine how Pregel works by implementing the Shortest Paths algorithm. The algorithm's goal is to find all shortest paths to a specific node in the graph, which we'll call a landmark. Initially, all nodes in the graph except the landmark start with a NULL state. The landmark is the only node with a non-NULL state, which is set to 0. In this case, each node's state represents its distance from the landmark.
+1. Vertices receive messages from the previous superstep
+2. Update their state based on received messages
+3. Send messages to other vertices for the next superstep
 
-### Message generation
+## SQL Translation
 
-If the state of the node is not NULL, then the message value equals the current STATE plus 1. For example, the first non-NULL subset of messages that will be sent is 1, which is transmitted to all neighbors of the landmark.
+IbisGraph translates this model into SQL operations. Here's a visualization of how a typical superstep works:
 
-### Message aggregation
+```
+Initial State:
+Table: vertices
++----+-------+
+| id | value |
++----+-------+
+| 1  | 0.2   |
+| 2  | 0.3   |
+| 3  | 0.5   |
++----+-------+
 
-On the aggregation step we are choosing the smallest value from all the messages.
+Table: edges
++------+--------+
+| from | to     |
++------+--------+
+| 1    | 2      |
+| 2    | 3      |
+| 3    | 1      |
++------+--------+
 
-### Updating the state
+Superstep:
+1. Generate messages:
+   SELECT 
+     e.to as target,
+     v.value as message
+   FROM vertices v
+   JOIN edges e ON v.id = e.from
 
-If the aggregation results are smaller than the current message state, we will use these results as the new state.
+2. Aggregate messages:
+   SELECT
+     target,
+     SUM(message) as agg_message
+   FROM messages
+   GROUP BY target
 
-### Example for 6-nodes graph
+3. Update vertices:
+   SELECT
+     v.id,
+     CASE 
+       WHEN m.agg_message IS NULL THEN v.value
+       ELSE function(v.value, m.agg_message)
+     END as new_value
+   FROM vertices v
+   LEFT JOIN messages m ON v.id = m.target
+```
 
-![Simple example of Shortest Paths with Pregel](https://raw.githubusercontent.com/SemyonSinchenko/ibisgraph/refs/heads/main/static/pregel-sp.png)
+## Key Components
 
-As you can see, on the iteration 4 we are sending a message to the vertex that has a state equal to 2, so in that case we are not updating the state.
+### 1. Graph State
+- Vertex data stored in regular SQL tables
+- Edge data stored in source-target format
+- Additional columns can store vertex/edge attributes
 
-# Pregel in IbisGraph
+### 2. Message Passing
+Implemented through:
+1. JOIN operations between vertex and edge tables
+2. Message generation expressions
+3. GROUP BY for message aggregation
 
-The Pregel implementation in IbisGraph is primarily a rewrite of the GraphFrames library's Pregel implementation. The key difference is that IbisGraph uses Ibis DataFrames instead of the Apache Spark DataFrame API. Additionally, several optimizations have been incorporated, including early stopping and nodes-voting functionality.
+### 3. Vertex State Updates
+Performed using:
+1. LEFT JOIN to preserve vertices that receive no messages
+2. UPDATE expressions defined by the algorithm
+3. Optional active vertex tracking
 
-## Pseudo-code description
+### 4. Halting Conditions
+Multiple stopping criteria available:
+- Maximum iterations reached
+- No messages generated
+- All vertices vote to halt
+- Custom convergence conditions
 
-- Generate initial value (state) for all the nodes. In the IbisGraph implementation, state is handled as a column in the nodes table. It is possible to provide a lot of state-columns.
-- Generate all triplets (node-edge-node) by performing two sequential joins of nodes data and edges. Each row in the triplets will contain all columns from the source node (as a `struct<>`), all columns from the destination node (as a `struct<>`), and all columns from the edges (also as a `struct<>`).
+## Performance Considerations
+
+### Advantages
+1. **No Data Movement**
+    - All processing happens in the data warehouse
+    - No need to extract data or maintain separate systems
+
+2. **Scalability**
+    - Inherits data warehouse scaling capabilities
+    - No single-machine memory limitations
+
+3. **Integration**
+    - Natural integration with SQL-based data pipelines
+    - Can leverage existing warehouse optimizations
+
+### Limitations
+1. **Iteration Overhead**
+    - Each superstep requires multiple SQL operations
+    - More expensive than native graph processing
+
+2. **Message Handling**
+    - Message generation can create large intermediate results
+    - Aggregation performance depends on warehouse capabilities
+
+3. **State Management**
+    - Vertex state changes require table updates
+    - May need careful tuning of checkpoint intervals
+
+## Implementation Details
+
+### Active Vertex Tracking
 
 ```python
-src_nodes_data = pregel_nodes_data.select(
-    ibis.struct({col: ibis._[col] for col in pregel_nodes_data.columns}).name(
-        IbisGraphConstants.SRC.value
+# Example of active vertex tracking
+pregel.set_has_active_flag(True)
+      .set_initial_active_flag(initial_condition)
+      .set_active_flag_upd_col(update_condition)
+```
+
+### Message Generation
+```python
+# Example of message generation
+pregel.add_message_to_dst(
+    ibis.case()
+        .when(condition, message_value)
+        .else_(None)
+)
+```
+
+### Vertex Updates
+```python
+# Example of vertex state update
+pregel.add_vertex_col(
+    "value",
+    initial_expr=initial_value,
+    update_expr=update_function(old_value, message)
+)
+```
+
+## Optimization Tips
+
+1. **Checkpoint Intervals**
+   - For single-node backends (DuckDB, SQLite):
+     ```python
+     pregel.set_checkpoint_interval(1)
+     ```
+   - For distributed engines (Spark, Snowflake):
+     ```python
+     pregel.set_checkpoint_interval(5)  # or higher
+     ```
+
+2. **Message Filtering**
+   ```python
+   # Filter messages from inactive vertices
+   pregel.set_filter_messages_from_non_active(True)
+   ```
+
+3. **Early Stopping**
+   ```python
+   # Stop when no new messages or all vertices inactive
+   pregel.set_early_stopping(True)
+   pregel.set_stop_if_all_unactive(True)
+   ```
+
+## Example: PageRank Implementation
+
+Here's how PageRank is implemented using this Pregel framework:
+
+```python
+def page_rank(graph: IbisGraph, alpha: float = 0.85) -> ibis.Table:
+    n_nodes = graph.num_nodes
+    initial_rank = 1.0 / n_nodes
+    
+    pregel = (
+        Pregel(graph)
+        .add_vertex_col(
+            "rank",
+            initial_expr=initial_rank,
+            update_expr=alpha * pregel.pregel_msg() + (1 - alpha) / n_nodes
+        )
+        .add_message_to_dst(
+            pregel.pregel_src("rank") / pregel.pregel_src("out_degree")
+        )
+        .set_agg_expression_func(lambda msg: msg.sum())
     )
-)
-dst_nodes_data = pregel_nodes_data.select(
-    ibis.struct({col: ibis._[col] for col in pregel_nodes_data.columns}).name(
-        IbisGraphConstants.DST.value
-    )
-)
-triplets = src_nodes_data.inner_join(
-    edges,
-    [
-        src_nodes_data[IbisGraphConstants.SRC.value][IbisGraphConstants.ID.value]
-        == edges[IbisGraphConstants.EDGE.value][IbisGraphConstants.SRC.value]
-    ],
-).inner_join(
-    dst_nodes_data,
-    [
-        dst_nodes_data[IbisGraphConstants.DST.value][IbisGraphConstants.ID.value]
-        == edges[IbisGraphConstants.EDGE.value][IbisGraphConstants.DST.value]
-    ],
-)
+    
+    return pregel.run()
 ```
 
-- Generate messages as tuples in the format (target -> message). The target can be either the source or destination of the edge. During message generation, you can utilize any information from the source, destination, and edge structures. In tabular notation, this operation simply involves selecting additional columns as an array and expanding this array into individual rows.
+This implementation shows how Pregel concepts map to SQL operations while maintaining the algorithm's logical structure.
 
-```python
-messages = [
-    ibis.struct({IbisGraphConstants.ID.value: m.target_column, "msg": m.msg_expr})
-    for m in self._messages
-]
-triplets_with_messages = triplets.select(ibis.array(messages).unnest().name("msg"))
-```
+## Best Practices
 
-Because each message is a pair, the new column `msg` is a struct. We can also desstruct this struct before doing back-join with nodes data:
+1. **Message Volume**
+    - Filter unnecessary messages when possible
+    - Use appropriate aggregation functions
+    - Consider using active vertex tracking
 
-```python
-new_messages_table = triplets_with_messages.filter(
-    triplets_with_messages["msg"]["msg"].notnull()
-).select(
-    triplets_with_messages["msg"][IbisGraphConstants.ID.value],
-    triplets_with_messages["msg"]["msg"].name(PregelConstants.MSG_COL_NAME.value),
-)
-```
+2. **State Management**
+    - Keep vertex state minimal
+    - Use appropriate data types
+    - Consider compression for large state
 
-- Join and aggregate messages step. Because we have a nodes data table (with a node-id column) and messages table (with reciever of the message id column), all that we need is to do groupby + aggregate + join:
+3. **Performance Tuning**
+    - Adjust checkpoint intervals based on backend
+    - Use appropriate convergence conditions
+    - Monitor intermediate result sizes
 
-```python
-aggregated_messages = new_messages_table.group_by(IbisGraphConstants.ID.value).agg(
-    {PregelConstants.MSG_COL_NAME.value: self._agg_expression_func(msg_col)}
-)
-pregel_nodes_data = pregel_nodes_data.join(
-    aggregated_messages, [IbisGraphConstants.ID.value], how="left"
-)
-```
+## Debugging Tips
 
-- Update of the state. Now when we have a table with node ID, current state columns and aggregated message, we can just do select of the new state and go the step 1.
+1. **Message Generation**
+    - Use `pregel_src()` and `pregel_dst()` helpers
+    - Check for NULL values in messages
+    - Verify message targeting
 
+2. **State Updates**
+    - Validate initial state expressions
+    - Check update logic with edge cases
+    - Monitor convergence patterns
 
-
+3. **Performance Issues**
+    - Check execution plans
+    - Monitor intermediate result sizes
+    - Verify checkpoint interval settings
