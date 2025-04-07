@@ -1,6 +1,6 @@
 import ibis
 
-from ibisgraph import IbisGraph, IbisGraphConstants
+from ibisgraph.graph import IbisGraph, IbisGraphConstants
 
 
 def in_degrees(graph: IbisGraph) -> ibis.Table:

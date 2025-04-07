@@ -2,8 +2,7 @@ from collections.abc import Sequence
 
 import ibis
 
-from ibisgraph import IbisGraph
-from ibisgraph.graph import IbisGraphConstants
+from ibisgraph.graph import IbisGraph, IbisGraphConstants
 from ibisgraph.pregel.pregel import Pregel
 
 DISTANCE_COL_NAME = "distances"
