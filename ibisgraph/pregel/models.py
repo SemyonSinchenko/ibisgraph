@@ -15,6 +15,7 @@ class PregelVertexColumn:
     initial_expr: Value | Deferred
     update_expr: Value | Deferred
 
+
 @dataclass
 class PregelMessage:
     target_column: Value
