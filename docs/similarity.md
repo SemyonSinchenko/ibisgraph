@@ -58,7 +58,7 @@ graph = ig.Graph(
 )
 
 # Calculate Jaccard similarity between all pairs of businesses
-similarity = graph.node_similarity(method='jaccard')
+similarity = ig.similarity.jaccard_similarity(graph)
 
 # Filter for highly similar pairs (e.g., similarity > 0.7)
 potential_matches = similarity.filter(similarity.similarity > 0.7)
@@ -139,7 +139,7 @@ weighted_graph = ig.Graph(
 
 ```python
 # Remove high-degree nodes (common transaction partners)
-degrees = graph.degrees()
+degrees = ig.centrality.degrees(graph)
 filtered_txns = recent_txns.filter(
     ~recent_txns.target_id.isin(
         degrees.filter(degrees.degree > 1000).node_id

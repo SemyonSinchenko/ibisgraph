@@ -1,4 +1,3 @@
-import ibis
 import pytest
 
 from ibisgraph.clustering import label_propagation

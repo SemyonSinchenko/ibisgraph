@@ -59,8 +59,17 @@ graph = ig.Graph(
 # Get list of blacklisted entity IDs
 blacklisted_ids = blacklist.select('entity_id').execute().entity_id.tolist()
 
-# Calculate shortest paths from all blacklisted nodes
-paths = graph.shortest_paths(sources=blacklisted_ids)
+# Calculate shortest paths from all blacklisted nodes;
+#
+# ShortestPaths routine returns a Map<landmark -> distance>
+# but in this case we need only distances
+paths = (
+    ig.traversal.shortest_paths(graph, landmarks=blacklisted_ids)
+    .select(
+        ibis._["node_id"],
+        ibid._["distances"].values().name("distances"),
+    )
+)
 
 # Create risk scores based on distances
 risk_assessment = (
@@ -148,8 +157,8 @@ historical_graph = ig.Graph(
 )
 
 # Compare paths in different time periods
-recent_paths = recent_graph.shortest_paths(blacklisted_ids)
-historical_paths = historical_graph.shortest_paths(blacklisted_ids)
+recent_paths = ig.traversal.shortest_paths(recent_graph, blacklisted_ids)
+historical_paths = ig.traversal.shortest_paths(historical_graph, blacklisted_ids)
 ```
 
 ### Transaction Volume Consideration
@@ -166,7 +175,7 @@ weighted_graph = ig.Graph(
 )
 
 # Higher weights mean stronger connections
-weighted_paths = weighted_graph.shortest_paths(blacklisted_ids)
+weighted_paths = ig.traveral.shortest_paths(weighted_graph, blacklisted_ids)
 ```
 
 ## Benefits of Using IbisGraph with Snowflake

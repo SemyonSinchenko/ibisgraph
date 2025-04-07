@@ -1,6 +1,6 @@
 import ibis
 
-from ibisgraph import IbisGraph
+from ibisgraph.graph import IbisGraph
 from ibisgraph.centrality.degrees import degrees, out_degrees
 from ibisgraph.graph import IbisGraphConstants
 from ibisgraph.pregel import Pregel

@@ -48,10 +48,11 @@ graph = ig.Graph(
 )
 
 # Calculate PageRank scores
-pagerank_scores = graph.pagerank(
-    damping=0.85,  # Standard damping factor
+pagerank_scores = ig.centrality.page_rank(
+    graph,
+    alpha=0.85,  # Standard damping factor
     max_iters=100,  # Maximum iterations
-    tolerance=1e-6  # Convergence tolerance
+    tol=1e-6  # Convergence tolerance
 )
 
 # Join with account information for analysis
@@ -94,7 +95,7 @@ def get_time_window_pagerank(start_date, end_date):
         weight_col='amount'
     )
     
-    return window_graph.pagerank()
+    return ig.centrality.page_rank(window_graph)
 
 # Compare monthly PageRank scores
 current_month = get_time_window_pagerank('2024-03-01', '2024-04-01')
@@ -136,7 +137,7 @@ risk_graph = ig.Graph(
 )
 
 # Calculate risk-weighted PageRank
-risk_pagerank = risk_graph.pagerank()
+risk_pagerank = ig.centrality.page_rank(risk_graph)
 ```
 
 ## Applications in Financial Analysis
