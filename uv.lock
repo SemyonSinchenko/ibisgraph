@@ -182,7 +182,7 @@ wheels = [
 
 [[package]]
 name = "ibis-framework"
-version = "10.3.1"
+version = "12.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "atpublic" },
@@ -193,9 +193,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "tzdata" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/1d/44/61a1a0283a9e4c06aab713c28f011f7f74872148484549a4b38b1a602423/ibis_framework-10.3.1.tar.gz", hash = "sha256:71919cdbe6eb4f6e916269b4d7a8582c67a20e0098364b3bb2347424a3a67ccf", size = 1215375, upload-time = "2025-03-14T12:13:40.839Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f2/8e/2e7ad9bdeaf45350da7beeb67a0d4317d400dac882825eb7c3bd4d3c6ae1/ibis_framework-12.0.0.tar.gz", hash = "sha256:238624f2c14fdab8382ca2f4f667c3cdb81e29844cd5f8db8a325d0743767c61", size = 1351369, upload-time = "2026-02-07T14:31:13.171Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/44/9e/3887676bfc2f9c8157e9a6ad6c5209d4fe68cc499a103050466320787a63/ibis_framework-10.3.1-py3-none-any.whl", hash = "sha256:8133be78feea2f8a3ecad76067e0164c45c91e058f4c06481277b719ddb0d6f4", size = 1919109, upload-time = "2025-03-14T12:13:38.681Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/b3/11d406849715b47c9d69bb22f50874f80caee96bd1cbe7b61abbebbf5a05/ibis_framework-12.0.0-py3-none-any.whl", hash = "sha256:0bbd790f268da9cb87926d5eaad2b827a573927113c4ed3be5095efa89b9e512", size = 2079219, upload-time = "2026-02-07T14:31:10.646Z" },
 ]
 
 [package.optional-dependencies]
