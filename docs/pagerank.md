@@ -39,11 +39,19 @@ conn = ibis.postgres.connect(
 # Load transaction data
 transactions = conn.table('transactions')
 
+# Build node table from transaction endpoints
+nodes = (
+    transactions.select(transactions.from_account.name('id'))
+    .union(transactions.select(transactions.to_account.name('id')))
+    .distinct()
+)
+
 # Create a weighted graph based on transaction amounts
-graph = ig.Graph(
+graph = ig.IbisGraph(
+    nodes,
     transactions,
-    source_col='from_account',
-    target_col='to_account',
+    src_col='from_account',
+    dst_col='to_account',
     weight_col='amount'  # Weight edges by transaction amounts
 )
 
@@ -88,10 +96,17 @@ def get_time_window_pagerank(start_date, end_date):
         (transactions.date < end_date)
     )
     
-    window_graph = ig.Graph(
+    window_nodes = (
+        window_transactions.select(window_transactions.from_account.name('id'))
+        .union(window_transactions.select(window_transactions.to_account.name('id')))
+        .distinct()
+    )
+
+    window_graph = ig.IbisGraph(
+        window_nodes,
         window_transactions,
-        source_col='from_account',
-        target_col='to_account',
+        src_col='from_account',
+        dst_col='to_account',
         weight_col='amount'
     )
     
@@ -129,10 +144,11 @@ risk_weighted_txns = transactions.mutate(
 )
 
 # Create risk-weighted graph
-risk_graph = ig.Graph(
+risk_graph = ig.IbisGraph(
+    nodes,
     risk_weighted_txns,
-    source_col='from_account',
-    target_col='to_account',
+    src_col='from_account',
+    dst_col='to_account',
     weight_col='risk_weight'
 )
 

@@ -57,13 +57,17 @@ import ibisgraph as ig
 # Connect to your database
 conn = ibis.duckdb.connect()
 
+# Prepare node and edge tables
+nodes = conn.table("nodes")  # must include integer 'id' column
+edges = conn.table("edges")  # must include integer 'src' and 'dst' columns
+
 # Create a graph
-graph = ig.Graph(nodes_table, edges_table)
+graph = ig.IbisGraph(nodes, edges, directed=True)
 
 # Run algorithms
-pagerank = ig.centrality.pagerank(graph)
+pagerank = ig.centrality.page_rank(graph)
 communities = ig.clustering.label_propagation(graph)
-similarities = ig.similarity.node_similarity(graph)
+similarities = ig.similarity.jaccard_similarity(graph)
 ```
 
 For more detailed examples, check our [documentation](https://semyonsinchenko.github.io/ibisgraph/).
@@ -158,6 +162,7 @@ We use:
     - Run tests: `pytest`
     - Run linter: `ruff check .`
     - Format code: `ruff format .`
+    - If behavior-facing code changes (API, configuration, feature support, or externally visible behavior), update related docs in the same PR
 
 4. **Submit PR**
     - Create a Pull Request
