@@ -49,11 +49,19 @@ transactions = conn.table('TRANSACTIONS')
 blacklist = conn.table('BLACKLIST')
 new_customers = conn.table('NEW_CUSTOMERS')
 
+# Build node table from transaction endpoints
+nodes = (
+    transactions.select(transactions.from_entity.name('id'))
+    .union(transactions.select(transactions.to_entity.name('id')))
+    .distinct()
+)
+
 # Create a graph from transactions
-graph = ig.Graph(
+graph = ig.IbisGraph(
+    nodes,
     transactions,
-    source_col='from_entity',
-    target_col='to_entity',
+    src_col='from_entity',
+    dst_col='to_entity',
 )
 
 # Get list of blacklisted entity IDs
@@ -67,7 +75,7 @@ paths = (
     ig.traversal.shortest_paths(graph, landmarks=blacklisted_ids)
     .select(
         ibis._["node_id"],
-        ibid._["distances"].values().name("distances"),
+        ibis._["distances"].values().name("distances"),
     )
 )
 
@@ -144,16 +152,18 @@ recent_transactions = transactions.filter(
 )
 
 # Separate graphs for different time periods
-recent_graph = ig.Graph(
+recent_graph = ig.IbisGraph(
+    nodes,
     recent_transactions,
-    source_col='from_entity',
-    target_col='to_entity'
+    src_col='from_entity',
+    dst_col='to_entity'
 )
 
-historical_graph = ig.Graph(
+historical_graph = ig.IbisGraph(
+    nodes,
     transactions.filter(transactions.transaction_date < '2024-01-01'),
-    source_col='from_entity',
-    target_col='to_entity'
+    src_col='from_entity',
+    dst_col='to_entity'
 )
 
 # Compare paths in different time periods
@@ -167,15 +177,16 @@ Weight paths by transaction volumes:
 
 ```python
 # Create graph with transaction amount weights
-weighted_graph = ig.Graph(
+weighted_graph = ig.IbisGraph(
+    nodes,
     transactions,
-    source_col='from_entity',
-    target_col='to_entity',
+    src_col='from_entity',
+    dst_col='to_entity',
     weight_col='transaction_amount'
 )
 
 # Higher weights mean stronger connections
-weighted_paths = ig.traveral.shortest_paths(weighted_graph, blacklisted_ids)
+weighted_paths = ig.traversal.shortest_paths(weighted_graph, blacklisted_ids)
 ```
 
 ## Benefits of Using IbisGraph with Snowflake

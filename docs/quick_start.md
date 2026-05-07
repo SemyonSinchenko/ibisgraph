@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-IbisGraph is a graph analytics library built on top of Ibis, allowing you to perform graph operations on data stored in various backends supported by Ibis. The main benefit of the IbisGraph is that data is staying in the backend and all the operations are done in this backend.
+IbisGraph is a graph analytics library built on top of Ibis. It lets you run graph operations directly on data that already lives in backends supported by Ibis.
 
 ## Installation
 
@@ -43,27 +43,34 @@ import ibisgraph as ig
 # Connect to your database
 conn = ibis.duckdb.connect()
 
-# Create example edge table
+# Create example node and edge tables
+nodes = conn.create_table(
+    'nodes',
+    schema={
+        'id': 'int64'
+    }
+)
+
 edges = conn.create_table(
     'edges',
     schema={
-        'source': 'int64',
-        'target': 'int64',
+        'src': 'int64',
+        'dst': 'int64',
         'weight': 'float64'
     }
 )
 
-# Create a graph from the edges table
-graph = ig.Graph(edges, source_col='source', target_col='target', weight_col='weight')
+# Create a graph from the node and edge tables
+graph = ig.IbisGraph(nodes, edges, directed=True, weight_col='weight')
 
 # Calculate degree metrics
-degrees = graph.degrees()
+degrees = ig.centrality.degrees(graph)
 
 # Find shortest paths
-paths = graph.shortest_paths(sources=[1, 2, 3])
+paths = ig.traversal.shortest_paths(graph, landmarks=[1, 2, 3])
 
 # Calculate PageRank
-pagerank = graph.pagerank()
+pagerank = ig.centrality.page_rank(graph)
 ```
 
 ## Common Operations
@@ -72,15 +79,15 @@ Here are some common graph operations you can perform:
 
 ```python
 # Get node degrees
-in_degrees = graph.in_degrees()
-out_degrees = graph.out_degrees()
-total_degrees = graph.degrees()
+in_degrees = ig.centrality.in_degrees(graph)
+out_degrees = ig.centrality.out_degrees(graph)
+total_degrees = ig.centrality.degrees(graph)
 
 # Find similar nodes
-similar_nodes = graph.node_similarity(method='jaccard')
+similar_nodes = ig.similarity.jaccard_similarity(graph)
 
 # Run community detection
-communities = graph.label_propagation()
+communities = ig.clustering.label_propagation(graph)
 ```
 
 For more detailed examples and API reference, please refer to the full documentation.

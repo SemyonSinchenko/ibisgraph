@@ -276,3 +276,7 @@ spark-warehouse/
 
 # LDBC
 resources/ldbc/*
+
+# AI
+.opencode
+openspec/changes/archive/*

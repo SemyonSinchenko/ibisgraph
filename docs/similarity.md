@@ -50,18 +50,26 @@ recent_txns = transactions.filter(
     transactions.date >= '2024-10-01'
 )
 
+# Build node table from transaction endpoints
+nodes = (
+    recent_txns.select(recent_txns.source_id.name('id'))
+    .union(recent_txns.select(recent_txns.target_id.name('id')))
+    .distinct()
+)
+
 # Create a graph from the transactions
-graph = ig.Graph(
+graph = ig.IbisGraph(
+    nodes,
     recent_txns,
-    source_col='source_id',
-    target_col='target_id'
+    src_col='source_id',
+    dst_col='target_id'
 )
 
 # Calculate Jaccard similarity between all pairs of businesses
 similarity = ig.similarity.jaccard_similarity(graph)
 
 # Filter for highly similar pairs (e.g., similarity > 0.7)
-potential_matches = similarity.filter(similarity.similarity > 0.7)
+potential_matches = similarity.filter(similarity.jaccard_similarity > 0.7)
 
 # If you have business metadata table
 business_info = conn.table('business_info')
@@ -71,16 +79,16 @@ results = (
     potential_matches
     .join(
         business_info.alias('b1'),
-        potential_matches.node1 == business_info.business_id
+        potential_matches.node_id_left == business_info.business_id
     )
     .join(
         business_info.alias('b2'),
-        potential_matches.node2 == business_info.business_id
+        potential_matches.node_id_right == business_info.business_id
     )
     .select([
-        'node1',
-        'node2',
-        'similarity',
+        'node_id_left',
+        'node_id_right',
+        'jaccard_similarity',
         'b1.business_name',
         'b1.registration_date',
         'b2.business_name',
@@ -119,18 +127,19 @@ q1_2023 = transactions.filter(
 )
 
 # Create separate graphs and compare
-graph_2024 = ig.Graph(q1_2024, source_col='source_id', target_col='target_id')
-graph_2023 = ig.Graph(q1_2023, source_col='source_id', target_col='target_id')
+graph_2024 = ig.IbisGraph(nodes, q1_2024, src_col='source_id', dst_col='target_id')
+graph_2023 = ig.IbisGraph(nodes, q1_2023, src_col='source_id', dst_col='target_id')
 ```
 
 2. **Transaction Amounts**: Weight edges by transaction amounts to give more importance to significant business relationships
 
 ```python
 # Create a weighted graph
-weighted_graph = ig.Graph(
+weighted_graph = ig.IbisGraph(
+    nodes,
     recent_txns,
-    source_col='source_id',
-    target_col='target_id',
+    src_col='source_id',
+    dst_col='target_id',
     weight_col='amount'
 )
 ```
